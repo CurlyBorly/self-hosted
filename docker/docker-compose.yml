@@ -1,231 +1,74 @@
-version: "3.2"
+version: "3.4"
+
+x-app: &default-apo
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-file: ${DOCKERLOGGING_MAXFILE}
+      max-size: ${DOCKERLOGGING_MAXSIZE}
+  labels:
+    - org.hotio.pullio.update=${PULLIO_UPDATE}
+    - org.hotio.pullio.notify=${PULLIO_NOTIFY}
+    - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+  environment:
+    - PUID=${PUID}
+    - PGID=${PGID}
+    - TZ=${TZ}
+    - UMASK=002
+
 services:
-# Radarr - https://hotio.dev/containers/radarr/
-# mkdir /volume1/docker/appdata/radarr
   radarr:
+    <<: *default-app
     container_name: radarr
     image: cr.hotio.dev/hotio/radarr:latest
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 7878:7878
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/radarr:/config
       - ${DOCKERSTORAGEDIR}:/data
 
-# Sonarr - https://hotio.dev/containers/sonarr/
-# mkdir /volume1/docker/appdata/sonarr
   sonarr:
+    <<: *default-app
     container_name: sonarr
     image: cr.hotio.dev/hotio/sonarr:v4
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 8989:8989
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/sonarr:/config
       - ${DOCKERSTORAGEDIR}:/data
 
-# Bazarr - https://hotio.dev/containers/bazarr/
-# mkdir /volume1/docker/appdata/bazarr
   bazarr:
+    <<: *default-app
     container_name: bazarr
     image: cr.hotio.dev/hotio/bazarr:nightly
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 6767:6767
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/bazarr:/config
       - ${DOCKERSTORAGEDIR}/media:/data/media
-      
-# Lidarr - https://hotio.dev/containers/lidarr/
-#
-# Don't forget to create the directory, change chown command if needed (the user:group part)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/lidarr
-#
+
   lidarr:
+    <<: *default-app
     container_name: lidarr
     image: lscr.io/linuxserver/lidarr:develop
     restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 8686:8686
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/lidarr/config:/config
-      - ${DOCKERCONFDIR}/lidarr/custom-services.d:/custom-services.d
-      - ${DOCKERCONFDIR}/lidarr/custom-cont-init.d:/custom-cont-init.d
+      # - ${DOCKERCONFDIR}/lidarr/custom-services.d:/custom-services.d
+      # - ${DOCKERCONFDIR}/lidarr/custom-cont-init.d:/custom-cont-init.d
       - ${DOCKERSTORAGEDIR}:/data
-      
-# PIA VPN
-  #vpn:
-  #  container_name: wireguard-pia
-  #  image: thrnz/docker-wireguard-pia
-  #  volumes:
-  #    - ${DOCKERCONFDIR}/vpn-proxy/pia:/pia
-  #    - ${DOCKERCONFDIR}/vpn-proxy/pia-shared:/pia-shared
-  #  logging:
-  #    driver: json-file
-  #    options:
-  #      max-file: ${DOCKERLOGGING_MAXFILE}
-  #      max-size: ${DOCKERLOGGING_MAXSIZE}
-  #  labels:
-  #    - org.hotio.pullio.update=${PULLIO_UPDATE}
-  #    - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-  #    - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
-  #  ports:
-  #    - 8080:8080
-  #  cap_add:
-  #    - NET_ADMIN
-  #  devices:
-  #    - /dev/net/tun:/dev/net/tun
-  #  environment:
-  #    - LOCAL_NETWORK=${LAN_NETWORK}
-  #    - LOC=${PIA_LOC}
-  #    - USER=${PIA_USER}
-  #    - PASS=${PIA_PASS}
-  #    - PORT_FORWARDING=1
-  #    - PORT_SCRIPT=/pia-shared/script.sh
-  #  sysctls:
-  #    - net.ipv4.conf.all.src_valid_mark=1
-  #    - net.ipv6.conf.default.disable_ipv6=1
-  #    - net.ipv6.conf.all.disable_ipv6=1
-  #    - net.ipv6.conf.lo.disable_ipv6=1
-  #  healthcheck:
-  #    test: ping -c 1 www.google.com || exit 1
-  #    interval: 30s
-  #    timeout: 10s
-  #    retries: 3
-      
-# qBittorrent - https://hub.docker.com/r/hotio/qbittorrent
-#
-# Don't forget to create the directory, change chown command if needed (the user:group part)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/qbittorrent
-#
-# If you want to use VPN follow the instructions below.
-# To enable VPN set "VPN_ENABLED=true" in the .env, and uncomment the 'devices' section below. If you don't want VPN enabled set "VPN_ENABLED=false"
-# Start the container, and in your /appdata/qbittorrent a wireguard folder will be created where you need to place your wg0.conf file you got from your VPN provider !!!
-# Edit the wg0.conf, change AllowedIPs to 0.0.0.0/1,128.0.0.0/1
-# Remove the `DNS = 1.1.1.1` line from the wg0.conf
-# Remove any preexisting preup or postup from your wg0.conf file
-# Add this preup to your wg0 (read the instructions): https://github.com/TRaSH-/Guides-Synology-Templates/blob/main/script/PreUp.sh
-#
-# If you are getting a "Failed to open '/dev/net/tun'" error, run the commands below.
-# 1 - sudo curl -sL https://raw.githubusercontent.com/TRaSH-/Guides-Synology-Templates/main/script/tun.service -o "/etc/systemd/system/tun.service"
-# 2"- sudo systemctl enable /etc/systemd/system/tun.service
-# 3 - sudo systemctl start tun
-# Check if running with - sudo systemctl status tun
-# recreate the container with - sudo docker-compose up --force-recreate qbittorrent
 
-  #qbittorrent:
-  #  container_name: qbittorrent
-  #  image: cr.hotio.dev/hotio/qbittorrent:legacy
-  #  restart: unless-stopped
-  #  logging:
-  #    driver: json-file
-  #    options:
-  #      max-file: ${DOCKERLOGGING_MAXFILE}
-  #      max-size: ${DOCKERLOGGING_MAXSIZE}
-  #  labels:
-  #    - org.hotio.pullio.update=${PULLIO_UPDATE}
-  #    - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-  #    - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
-  #  network_mode: "service:vpn"
-  #  #ports:
-  #    #- ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT}
-  #    #- ${QBITTORRENT_PRIVOXY_PORT}:${QBITTORRENT_PRIVOXY_PORT}
-  #  cap_add:
-  #    - NET_ADMIN
-  #  #devices:                              # Optional, uncomment if you use VPN
-  #    #- /dev/net/tun:/dev/net/tun         # Optional, uncomment if you use VPN
-  #  sysctls:
-  #    - net.ipv4.conf.all.src_valid_mark=1
-  #    - net.ipv6.conf.all.disable_ipv6=1  # Optional, if you want to use ipv6, remove this line. If you keep this line, make sure there is no ipv6 in your wg0.conf.
-  #  environment:
-  #    - PUID=${PUID}
-  #    - PGID=${PGID}
-  #    - TZ=${TZ}
-  #    - UMASK=022
-  #    - VPN_ENABLED=${VPN_ENABLED}
-  #    - VPN_LAN_NETWORK=${LAN_NETWORK}
-  #    - VPN_CONF=wg0
-  #    - PRIVOXY_ENABLED=${QBITTORRENT_ENABLE_PRIVOXY}
-  #    #- WEBUI_PORTS=${QBITTORRENT_WEBUI_PORT}/tcp,${QBITTORRENT_WEBUI_PORT}/udp  # Optional only needed if you want to change the default 8080 WebUI port
-  #  #dns:
-  #    #- 1.1.1.1
-  #    #- 8.8.8.8
-  #  volumes:
-  #    - /etc/localtime:/etc/localtime:ro
-  #    - ${DOCKERCONFDIR}/qbittorrent:/config:rw
-  #    - ${DOCKERSTORAGEDIR}/torrents:/data/torrents:rw
-  
   gluetun:
+    <<: *default-app
     image: qmcgaw/gluetun
     container_name: gluetun
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     cap_add:
       - NET_ADMIN
     devices:
@@ -257,17 +100,9 @@ services:
     restart: unless-stopped
 
   qbittorrent:
+    <<: *default-app
     image: linuxserver/qbittorrent
     container_name: qbittorrent
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -282,125 +117,20 @@ services:
     depends_on:
       - gluetun
     restart: unless-stopped
-      
-# qbit_manage - https://hub.docker.com/r/hotio/qbitmanage
-#
-# Don't forget to create the directory, change chown command if needed (the user:group part)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/qbitmanage
-#
-  qbit_manage:
-    container_name: qbitmanage
-    image: bobokun/qbit_manage
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=022
-      - TZ=${TZ}
-      - QBT_DRY_RUN=true
-      - QBT_RUN=false
-      - QBT_SCHEDULE=1440
-      - QBT_STARTUP_DELAY=30
-      - QBT_CONFIG=config.yml
-      - QBT_LOGFILE=activity.log
-      - QBT_CROSS_SEED=false
-      - QBT_RECHECK=false
-      - QBT_CAT_UPDATE=false
-      - QBT_TAG_UPDATE=false
-      - QBT_REM_UNREGISTERED=false
-      - QBT_REM_ORPHANED=false
-      - QBT_TAG_NOHARDLINKS=false
-      - QBT_TAG_TRACKER_ERROR=false
-      - QBT_SKIP_RECYCLE=false
-      - QBT_LOG_LEVEL=INFO
-      - QBT_DIVIDER==
-      - QBT_WIDTH=100
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKERCONFDIR}/qbitmanage:/config
-      - ${DOCKERCONFDIR}/qbittorrent/qBittorrent/BT_backup:/qbittorrent/data/BT_backup # modify if needed
-      - ${DOCKERSTORAGEDIR}/torrents:/data/torrents               # modify if needed
-      
-# cross-seed - https://hub.docker.com/r/mmgoodnow/cross-seed
-#
-# Don't forget to create the directory, change chown command if needed (the user:group part)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/cross-seed
-#
-  cross-seed:
-    container_name: cross-seed
-    image: ghcr.io/cross-seed/cross-seed:latest
-    restart: unless-stopped
-    user: ${PUID}:${PGID}
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
-    ports:
-      - 2468:2468
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKERCONFDIR}/cross-seed:/config
-      - ${DOCKERCONFDIR}/qbittorrent/qBittorrent/BT_backup:/torrents:ro
-      - ${DOCKERSTORAGEDIR}/torrents:/cross-seeds
-    command: daemon
-      
-# Prowlarr - https://hotio.dev/containers/prowlarr/
-#
-# Don't forget to create the directory, change chown command if needed (the user:group part)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/prowlarr
-#
+
   prowlarr:
+    <<: *default-app
     container_name: prowlarr
     image: cr.hotio.dev/hotio/prowlarr:testing
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 9696:9696
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-      - ARGS=
     volumes:
       - ${DOCKERCONFDIR}/prowlarr:/config:rw
       
   picard:
+    <<: *default-app
     container_name: picard
     image: mikenye/picard
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 5800:5800
     environment:
@@ -415,20 +145,10 @@ services:
       - ${DOCKERSTORAGEDIR}:/storage:rw
     restart: always
 
-# slskd
-#
   slskd:
+    <<: *default-app
     image: slskd/slskd
     container_name: slskd
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 5030:5030
       - 5031:5031
@@ -440,25 +160,11 @@ services:
       - ${DOCKERCONFDIR}/slskd:/app
       - ${DOCKERSTORAGEDIR}:/data
     restart: always
-      
-# Tautulli - https://hotio.dev/containers/tautulli/
-#
-# Don't forget to create the directory, change the -u value if needed (the created user)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/tautulli
-#
+
   tautulli:
+    <<: *default-app
     container_name: tautulli
     image: cr.hotio.dev/hotio/tautulli
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 8181:8181
     environment:
@@ -471,25 +177,11 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERCONFDIR}/tautulli:/config:rw
-      
-# Dozzle - https://dozzle.dev/
-#
-# Don't forget to create the directory, change chown command if needed (the user:group part)
-# sudo -u docker mkdir -m=00775 /volume1/docker/appdata/dozzle
-#
+
   dozzle:
+    <<: *default-app
     container_name: dozzle
     image: amir20/dozzle
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 9999:8080
     environment:
@@ -502,25 +194,11 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      
-# unpackerr - https://hub.docker.com/r/hotio/unpackerr
-#
-# Don't forget to create the directory
-# sudo mkdir -m=00775 /volume1/docker/appdata/unpackerr
-#
+
   unpackerr:
+    <<: *default-app
     container_name: unpackerr
     image: cr.hotio.dev/hotio/unpackerr:release
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -532,22 +210,10 @@ services:
     security_opt:
       - no-new-privileges:true
 
-# Plex - https://hotio.dev/containers/plex/
-# mkdir -p /volume1/docker/appdata/plex
-# Also please read the extra info => https://trash-guides.info/Hardlinks/How-to-setup-for/Synology/#appdata
   plex:
+    <<: *default-app
     container_name: plex
     image: cr.hotio.dev/hotio/plex
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
     ports:
       - 32400:32400
     environment:
@@ -569,33 +235,21 @@ services:
 #    tmpfs:                                          # optional: if you have a Syno with enough RAM, you can uncomment this line to enable transcoding in RAM. uncomment this line.
 #      - /transcode                                  # optional: if you have a Syno with enough RAM, you can uncomment this line to enable transcoding in RAM. uncomment this line.
 
-# notifiarr - https://hub.docker.com/r/golift/notifiarr/
-#
-# Don't forget to create the directory
-# sudo mkdir -m=00775 /volume1/docker/appdata/notifiarr
-#
-# It is important that a static hostname is set so the site can keep track of multiple clients for the settings
-  notifiarr:
-    container_name: notifiarr
-    hostname: ${HOSTNAME}
-    image: golift/notifiarr:latest
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-file: ${DOCKERLOGGING_MAXFILE}
-        max-size: ${DOCKERLOGGING_MAXSIZE}
-    user: ${PUID}:${PGID}
-    ports:
-      - 5454:5454
+  soularr:
+    <<: *default-app
+    container_name: soularr
+    hostname: soularr
     environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
+      #Script interval in seconds
+      - SCRIPT_INTERVAL=300
+    user: ${PUID}:${PGID}
     volumes:
-      - ${DOCKERCONFDIR}/notifiarr:/config
-      - ${DOCKERCONFDIR}:/appdata
-      #- /var/run/utmp:/var/run/utmp          # optional, only needed if you want to count users
-    # privileged: true                         # Optional, only needed for Snapshots
-    labels:
-      - org.hotio.pullio.update=${PULLIO_UPDATE}
-      - org.hotio.pullio.notify=${PULLIO_NOTIFY}
-      - org.hotio.pullio.discord.webhook=${PULLIO_DISCORD_WEBHOOK}
+      #"You can set /downloads to whatever you want but will then need to change the Slskd download dir in your config file"
+      - ${DOCKERDATADIR}/slskd/downloads:/downloads
+      #Select where you are storing your config file. 
+      #Leave "/data" since thats where the script expects the config file to be
+      - ${DOCKERCONFDIR}/soularr:/data
+    image: mrusse08/soularr:latest
