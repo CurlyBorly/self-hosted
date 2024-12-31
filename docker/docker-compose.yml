@@ -1,6 +1,6 @@
 version: "3.4"
 
-x-app: &default-apo
+x-app: &default-app
   restart: unless-stopped
   logging:
     driver: json-file
@@ -21,7 +21,7 @@ services:
   radarr:
     <<: *default-app
     container_name: radarr
-    image: cr.hotio.dev/hotio/radarr:latest
+    image: hotio/radarr:latest
     ports:
       - 7878:7878
     volumes:
@@ -32,7 +32,7 @@ services:
   sonarr:
     <<: *default-app
     container_name: sonarr
-    image: cr.hotio.dev/hotio/sonarr:v4
+    image: hotio/sonarr:v4
     ports:
       - 8989:8989
     volumes:
@@ -43,7 +43,7 @@ services:
   bazarr:
     <<: *default-app
     container_name: bazarr
-    image: cr.hotio.dev/hotio/bazarr:nightly
+    image: hotio/bazarr:nightly
     ports:
       - 6767:6767
     volumes:
@@ -121,7 +121,7 @@ services:
   prowlarr:
     <<: *default-app
     container_name: prowlarr
-    image: cr.hotio.dev/hotio/prowlarr:testing
+    image: hotio/prowlarr:testing
     ports:
       - 9696:9696
     volumes:
@@ -164,7 +164,7 @@ services:
   tautulli:
     <<: *default-app
     container_name: tautulli
-    image: cr.hotio.dev/hotio/tautulli
+    image: hotio/tautulli
     ports:
       - 8181:8181
     environment:
@@ -198,7 +198,7 @@ services:
   unpackerr:
     <<: *default-app
     container_name: unpackerr
-    image: cr.hotio.dev/hotio/unpackerr:release
+    image: hotio/unpackerr:release
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -213,7 +213,7 @@ services:
   plex:
     <<: *default-app
     container_name: plex
-    image: cr.hotio.dev/hotio/plex
+    image: hotio/plex
     ports:
       - 32400:32400
     environment:
